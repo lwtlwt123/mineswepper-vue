@@ -1,5 +1,8 @@
 <template>
-    <img src="" alt="">
+     <!-- 外壳 -->
+     <div class="shell">
+
+     </div>
 </template>
 
 <script setup>
@@ -7,4 +10,6 @@
 // import ''
 </script>
 
-<style scoped></style>
+<style scoped lang="less">
+
+</style>
