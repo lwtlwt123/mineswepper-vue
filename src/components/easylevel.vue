@@ -3,12 +3,21 @@
         <!-- 雷有了  判断状态-->
         <div class="item" v-for="(cell, index) in gridList"
             @click="clickFn(index, cell ? cell.isHaveMine : 0, 'left', 81)"
-            @contextmenu.prevent="clickFn(index, cell ? cell.isHaveMine : 0, 'right')" :key="index">
+            @contextmenu.prevent="clickFn(index, cell ? cell.isHaveMine : 0, 'right', 81)" :key="index">
             <!-- {{ cell ? cell.isHaveMine : 0 }} -->
             <!-- 做到点击到地雷才显示所有地雷 -->
             <!-- 判断点击的index -->
-            {{ cell && cell.isHaveMine }}
-            <div :class="{ haveMine: cell && cell.isHaveMine && isShow }"></div>
+            <!-- {{ cell && cell.isHaveMine }} -->
+            <!-- {{ cell ? cell.state : 0 }} -->
+            <div :class="{
+                haveMine: cell && cell.isHaveMine && isShow,
+                isClick: cell && cell.state == 1,
+                isPlantAFlag: cell && cell.state == 3,
+                isQuestion: cell && cell.state == 4
+            }">
+                <!-- {{ cell && cell.state }} -->
+                {{ cell && cell.state === 1 && cell.mineNum > 0 ? cell.mineNum : '' }}
+            </div>
 
         </div>
     </div>
@@ -28,14 +37,18 @@ const mineArr = ref([])
 // 刚进页面时不给 gridlist 赋值 用另外一个数组进行渲染
 const gridList = ref(new Array(81))
 
+// 渲染雷的个数的标志
+// const mineNum = ref(0)
+
 // 这样传ref
-let isClick = 0
+const isClick = ref(0)
 const isShow = ref(0)
 const clickFn = (i, state, clickMethod, mode) => {
+    let sign = clickMineFn(i, state, clickMethod, mode, mineArr, gridList, isClick)
 
     // 点击到地雷显示游戏结束了
-    isShow.value = clickMineFn(i, state, clickMethod, mode, mineArr, gridList, isClick)
-    if (isShow.value) {
+    isShow.value = sign
+    if (isShow.value === 1) {
         ElMessageBox.alert('踩雷啦，游戏结束！', '提示', {
             confirmButtonText: '重新开始',
             type: 'error',
@@ -43,14 +56,12 @@ const clickFn = (i, state, clickMethod, mode) => {
     }
 
 
-    // if (clickMineFn(i, state, clickMethod, mode, mineArr, gridList, isClick) == 1) {
-    //  console.log('重合了');
+    // if()
+    // console.log(clickMineFn(i, state, clickMethod, mode, mineArr, gridList, isClick));
+    if (sign !== 'stop') {
+        isClick.value = 1
+    }
 
-    // }
-    // clickMineFn(i, state, clickMethod, mode, mineArr, gridList, isClick)
-    isClick = 1
-    // console.log('我在点击' + i + '格子', mineArr.value);
-    // 判断点击的格子是否和炸弹数组重合
 
 
 }
@@ -58,8 +69,8 @@ const clickFn = (i, state, clickMethod, mode) => {
 
 watch(() => gridList.value,
     (newVal) => {
-        console.log('✅ 监听到数组变化了！', newVal)
-        console.log('✅ 第一项：', newVal[0])
+        // console.log('✅ 监听到数组变化了！', newVal)
+        // console.log('✅ 第一项：', newVal[0])
     },
     { deep: true })
 
@@ -100,6 +111,34 @@ watch(() => gridList.value,
         background-size: 80%;
         background-repeat: no-repeat;
         background-position: center;
+    }
+
+    .isPlantAFlag {
+        width: 100%;
+        height: 100%;
+        background-image: url(../assets/image/flag.svg);
+        background-size: 80%;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+    .isQuestion {
+        width: 100%;
+        height: 100%;
+        background-image: url(../assets/image/que.svg);
+        background-size: 80%;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+    .isClick {
+        width: 100%;
+        height: 100%;
+        background-color: #e0e0e0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
     }
 }
 </style>

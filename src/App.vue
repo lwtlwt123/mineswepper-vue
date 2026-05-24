@@ -50,7 +50,7 @@ import easyLevel from "./components/easylevel.vue";
 .gameBoard {
     width: 152px;
     height: 152px;
-    background-color: orange;
+    background-color: #c0c0c0;
     // position: absolute;
     // top: 50%;
     // left: 500px;

@@ -9,11 +9,25 @@ export function methodOfGeneratingLandmines(arrlength, num, i) {
     for (let index = 0; index < num; index++) {
         // 排除相同元素
         // 每次添加遍历一遍 如果有相同的 不添加 没有再添加
-        let randomNum = Math.floor(Math.random() * (arrlength + 1))
-        if (mineList.indexOf(randomNum) === -1 && mineList.indexOf(i) === -1) {
+        // let randomNum = Math.floor(Math.random() * (arrlength + 1))
+        // debugger
+        // console.log(mineList.indexOf(i));
+
+        /* if (mineList.indexOf(randomNum) === -1 && mineList.indexOf(i) === -1) {
             mineList.push(randomNum)
         } else {
             index--
+        } */
+        while (mineList.length < num) {
+            // 生成 0 ~ 总格子数-1 的随机数
+            let randomNum = Math.floor(Math.random() * arrlength)
+
+            // 满足两个条件才加入
+            // 1. 不重复
+            // 2. 不是第一次点击的位置 i
+            if (!mineList.includes(randomNum) && randomNum !== i) {
+                mineList.push(randomNum)
+            }
         }
 
     }
@@ -38,12 +52,15 @@ export function cellularAutomatonMethod(arr, quantity, mineArr, i) {
             // 4个状态 未点开0 点开1 标记2 疑问3
             // 初始化只要是未点开
             arr.push({
+                // 有地雷的标志
                 isHaveMine: 1,
-                state: 0
+                state: 0,
+                mineNum: 0
             })
         else arr.push({
             isHaveMine: 0,
-            state: 0
+            state: 0,
+            mineNum: 0
         })
     }
 
@@ -53,43 +70,176 @@ export function cellularAutomatonMethod(arr, quantity, mineArr, i) {
 }
 
 // 点击事件
-export function clickMineFn(i, state, clickMethod, mode, mineArr, gridList, isClick) {
+export function clickMineFn(i, isHaveMine, clickMethod, mode, mineArr, gridList, isClick) {
+    // console.log(isClick.value);
+
     // state 状态  clickMethod 判断左右键点击不同的方法
     // 点击之后才开始分配雷区
     // 判断第一次点击
-    if (!isClick)
+    if (!isClick.value)
         // 只有第一次点击调用此方法
         mineArr.value = methodOfGeneratingLandmines(mode, 10, i)
-
-
+    // console.log(gridList.value[i]);
 
     // 左键
     if (clickMethod == "left") {
-        // 游戏开始 调动生成格子方法 需修改格子 不能上来就点到雷区
-        // console.log(mineArr);
+        // 游戏开始 调动生成格子方法 需修改格子 不能上来就点到雷区™™
 
         // 第一次点击赋值
-        if (!state)
+        if (!isClick.value) {
             gridList.value = cellularAutomatonMethod([], 81, mineArr.value, i)
+            // console.log(gridList);
+        }
+        if (gridList.value[i].state == 3 || gridList.value[i].state == 4) {
+            return
+        }
+        // 点击之后状态改变 已点开
+        gridList.value[i].state = 1
+        // console.log(gridList.value[i]);
+
 
         // 判断点击格子是否和炸弹数组重合？
-        console.log(i);
+        // console.log(i);
         let clickstate = 0
         mineArr.value.forEach(element => {
-            // console.log(element);
-            console.log(i == element);
+            // 点击到雷了
+            if (i == element) clickstate = 1
+            // 没有点到雷 打开页面
+            else {
+                let { result, isMine } = mineClearFn(i, mineArr, gridList)
+                // console.log(result, isMine);
+                // 一圈全部没有雷
+                if (!isMine) {
+                    result.forEach(element => {
+                        mineClearFn(element, mineArr, gridList)
+                        // console.log(element);
+                    });
+                }
 
-            if (i == element) {
-                //  console.log('重合了');
-                clickstate = 1
             }
         });
         return clickstate
 
 
     } else if (clickMethod == "right") {
-        // console.log('右键');
+        // 判断右键时的状态 
+        if (!isClick.value) {
+            return 'stop'
+        } else {
+            //第一次右键插旗
+            console.log(gridList.value[i].state);
+
+            if (gridList.value[i].state == 3)
+                gridList.value[i].state = 4
+            else if (gridList.value[i].state == 4)
+                gridList.value[i].state = 0
+            else
+                gridList.value[i].state = 3
+
+        }
+
+
 
     }
 }
+
+// 未点击到雷 的操作函数
+/* 
+    扩大页面
+    点击后会显示附近有多少个雷
+*/
+export function mineClearFn(i, mineArr, gridList) {
+    /* 
+    遍历四周一圈 判断有多少雷 显示在该方块上 
+    给i 设定个坐标 （x，y）
+    x=  i -9y
+    y= Math.celi(i % 9)
+    左上 
+    */
+    // i: 0~80
+    let y = Math.floor(i / 9) // 结果：0~8
+    let x = i % 9             // 结果：0~8
+    // console.log(x, y);
+
+    // console.log(`坐标是${x},${y}`);
+    /* 
+       得到坐标
+         判断四周有没有雷
+         左上 （x-1，y-1）
+         上（x，y-1）
+         右上（x+1，y-1）
+         左（x-1，y）
+         右（x+1，y）
+         左下（x-1，y+1）
+         下（x，y+1）
+         右下（x+1，y+1）
+
+         根据他们的xy值恢复角标 i 然后判断在不在有雷数组里面 在的话存起来形成一个新数组 获得长度显示在中间
+
+         需判断结束后的 xy值不能 小于0大于9
+     */
+    // 将他们的坐标存入数组中
+    /* let arondArr = []
+
+    arondArr.push(allAroundArrFn(x - 1, y - 1))
+    arondArr.push(allAroundArrFn(x, y - 1))
+    arondArr.push(allAroundArrFn(x + 1, y - 1))
+    arondArr.push(allAroundArrFn(x - 1, y))
+    arondArr.push(allAroundArrFn(x + 1, y))
+    arondArr.push(allAroundArrFn(x - 1, y + 1))
+    arondArr.push(allAroundArrFn(x, y + 1))
+    arondArr.push(allAroundArrFn(x + 1, y + 1))
+    console.log(arondArr); */
+
+    // 2. 周围8个方向（标准写法）
+    const around = [
+        { x: x - 1, y: y - 1 },
+        { x: x, y: y - 1 },
+        { x: x + 1, y: y - 1 },
+        { x: x - 1, y: y },
+        { x: x + 1, y: y },
+        { x: x - 1, y: y + 1 },
+        { x: x, y: y + 1 },
+        { x: x + 1, y: y + 1 },
+    ]
+
+    // 3. 过滤掉越界的（x,y 必须 0~8）
+    const valid = around.filter(item => {
+        return item.x >= 0 && item.x < 9 && item.y >= 0 && item.y < 9
+    })
+
+    // 4. 把合法坐标转回数组索引
+    const result = valid.map(item => {
+        return item.y * 9 + item.x  // 绝对不会出负数！
+    })
+
+    // console.log(result);
+
+    // 判断result 和 mineArr有几个重合的 判断雷的个数 有就显示数字 没有啥也不显示
+    // console.log(mineArr.value);
+    let isMine = 1
+    let count = result.filter(n => new Set(mineArr.value).has(n)).length;
+    if (count == 0) isMine = 0
+
+    gridList.value[i].mineNum = count
+    gridList.value[i].state = 1
+
+    // console.log(gridList.value);
+
+    // mineNum.value = count
+    // console.log(count);
+
+
+    return { result, isMine }
+
+
+
+
+
+
+
+
+
+}
+
 
