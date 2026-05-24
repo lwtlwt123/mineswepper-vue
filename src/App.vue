@@ -17,13 +17,17 @@
         <!-- 中等  16*16 40 -->
         <!-- 困难  30*16 99 -->
         <div class="gameBoard">
+            
             <easyLevel />
         </div>
+
+        <!-- <testPage /> -->
     </div>
 </template>
 
 <script setup>
 import easyLevel from "./components/easylevel.vue";
+// import testPage from './components/test.vue'
 </script>
 
 <style scoped lang="less">
