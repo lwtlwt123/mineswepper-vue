@@ -69,8 +69,8 @@ const clickFn = (i, state, clickMethod, mode) => {
 
 watch(() => gridList.value,
     (newVal) => {
-        // console.log('✅ 监听到数组变化了！', newVal)
-        // console.log('✅ 第一项：', newVal[0])
+        // 判断胜利状态
+        
     },
     { deep: true })
 
