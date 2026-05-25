@@ -17,7 +17,7 @@
         <!-- 中等  16*16 40 -->
         <!-- 困难  30*16 99 -->
         <div class="gameBoard">
-            
+
             <easyLevel />
         </div>
 
@@ -34,8 +34,9 @@ import easyLevel from "./components/easylevel.vue";
 .shell {
     width: 200px;
     // height: 300px;
-    background-color: pink;
+    background-color: #c0c0c0;
     padding: 5px 10px;
+    border: 3px outset #dfdfdf;
 }
 
 .tool {
@@ -55,5 +56,6 @@ import easyLevel from "./components/easylevel.vue";
     // top: 50%;
     // left: 500px;
     margin: 30px auto 40px;
+    border: 3px outset #dfdfdf
 }
 </style>

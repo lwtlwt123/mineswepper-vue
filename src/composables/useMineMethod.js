@@ -106,28 +106,28 @@ export function clickMineFn(i, isHaveMine, clickMethod, mode, mineArr, gridList,
             if (i == element) clickstate = 1
             // 没有点到雷 打开页面
             else {
-                let { result, isMine } = mineClearFn(i, mineArr, gridList)
+                // let { result, isMine } = mineClearFn(i, mineArr, gridList)
                 // console.log(result, isMine);
                 // 一圈全部没有雷
-                if (!isMine) {
-                    result.forEach(element => {
-                        mineClearFn(element, mineArr, gridList)
-                        // console.log(element);
-                    });
-                }
+                // if (!isMine) {
+                // result.forEach(element => {
+                mineClearFn(i, mineArr, gridList)
+                // console.log(element);
+                // });
+                // }
 
             }
         });
         return clickstate
 
 
-    } else if (clickMethod == "right") {
+    } else if (clickMethod == "right" && gridList.value[i].state !== 1) {
         // 判断右键时的状态 
         if (!isClick.value) {
             return 'stop'
         } else {
             //第一次右键插旗
-            console.log(gridList.value[i].state);
+            // console.log(gridList.value[i].state);
 
             if (gridList.value[i].state == 3)
                 gridList.value[i].state = 4
@@ -143,12 +143,36 @@ export function clickMineFn(i, isHaveMine, clickMethod, mode, mineArr, gridList,
     }
 }
 
+let isManualFlag = 0
 // 未点击到雷 的操作函数
 /* 
     扩大页面
     点击后会显示附近有多少个雷
 */
 export function mineClearFn(i, mineArr, gridList) {
+    // console.log(gridList.value[i].state);
+    // console.log(11111);
+    
+
+
+    // 已打开 就返回
+    if (gridList.value[i].state === 1 && isManualFlag) {
+        console.log(213);
+
+        return
+    }
+    // console.log(mineArr.value.includes(i));
+
+
+    // 格子是雷
+    if (mineArr.value.includes(i) && isManualFlag) {
+        console.log(123);
+
+        return
+    }
+// console.log(1);
+
+
     /* 
     遍历四周一圈 判断有多少雷 显示在该方块上 
     给i 设定个坐标 （x，y）
@@ -202,9 +226,12 @@ export function mineClearFn(i, mineArr, gridList) {
         { x: x, y: y + 1 },
         { x: x + 1, y: y + 1 },
     ]
-
-    // 3. 过滤掉越界的（x,y 必须 0~8）
+    // console.log(1);
+    
+    //3. 过滤掉越界的（x,y 必须 0~8）
     const valid = around.filter(item => {
+        // console.log(1);
+        
         return item.x >= 0 && item.x < 9 && item.y >= 0 && item.y < 9
     })
 
@@ -212,25 +239,41 @@ export function mineClearFn(i, mineArr, gridList) {
     const result = valid.map(item => {
         return item.y * 9 + item.x  // 绝对不会出负数！
     })
+    // console.log(11111);
+    
 
     // console.log(result);
 
     // 判断result 和 mineArr有几个重合的 判断雷的个数 有就显示数字 没有啥也不显示
     // console.log(mineArr.value);
-    let isMine = 1
+    // let isMine = 1
     let count = result.filter(n => new Set(mineArr.value).has(n)).length;
-    if (count == 0) isMine = 0
-
     gridList.value[i].mineNum = count
     gridList.value[i].state = 1
-
-    // console.log(gridList.value);
-
-    // mineNum.value = count
-    // console.log(count);
+    // console.log(gridList.value[i].mineNum);
 
 
-    return { result, isMine }
+    //  周围一圈都没有雷
+    if (count == 0 || gridList.value[i].mineNum == 0) {
+        if (gridList.value[i].mineNum == 0) {
+            console.log('自己为空 ，马上递归');
+
+        }
+        result.forEach((item) => {
+            // 变成自动
+            isManualFlag = 1
+            mineClearFn(item, mineArr, gridList)
+            isManualFlag = 0
+        })
+        // isMine = 0
+    } else isManualFlag = 0
+
+
+
+
+
+
+    return
 
 
 
