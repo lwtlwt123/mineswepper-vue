@@ -76,13 +76,15 @@ export function clickMineFn(i, isHaveMine, clickMethod, mode, mineArr, gridList,
     // state 状态  clickMethod 判断左右键点击不同的方法
     // 点击之后才开始分配雷区
     // 判断第一次点击
-    if (!isClick.value)
-        // 只有第一次点击调用此方法
-        mineArr.value = methodOfGeneratingLandmines(mode, 10, i)
     // console.log(gridList.value[i]);
 
     // 左键
     if (clickMethod == "left") {
+        // console.log(isClick.value);
+
+        if (!isClick.value)
+            // 只有第一次点击调用此方法
+            mineArr.value = methodOfGeneratingLandmines(mode, 10, i)
         // 游戏开始 调动生成格子方法 需修改格子 不能上来就点到雷区™™
 
         // 第一次点击赋值
@@ -90,6 +92,7 @@ export function clickMineFn(i, isHaveMine, clickMethod, mode, mineArr, gridList,
             gridList.value = cellularAutomatonMethod([], 81, mineArr.value, i)
             // console.log(gridList);
         }
+        // console.log(gridList.value[i]);
         if (gridList.value[i].state == 3 || gridList.value[i].state == 4) {
             return
         }
@@ -121,7 +124,10 @@ export function clickMineFn(i, isHaveMine, clickMethod, mode, mineArr, gridList,
         return clickstate
 
 
-    } else if (clickMethod == "right" && gridList.value[i].state !== 1) {
+    } else if (clickMethod == "right" && (gridList.value[i] ? gridList.value[i].state !== 1 : 0)) {
+        // console.log(gridList.value);
+
+
         // 判断右键时的状态 
         if (!isClick.value) {
             return 'stop'
@@ -138,9 +144,39 @@ export function clickMineFn(i, isHaveMine, clickMethod, mode, mineArr, gridList,
 
         }
 
+        // console.log(isClick);
+
+
 
 
     }
+    // 双击事件
+    else if (clickMethod == 'db') {
+        console.log('这里是双击事件');
+        /* 如果周围的雷全部被标记 双击打开格子 */
+        // 判断周围的雷是否全被标记了
+        // if(){}
+        // 周边一圈的坐标
+        const aroundArr = ineClearFn(i, mineArr, gridList)
+        // 标记了的坐标
+        const flagged = gridList.value
+            .map((cell, idx) => cell.state === 3 ? idx : -1)
+            .filter(i => i !== -1)
+        // 获取一个新数组 周边标记了的坐标
+        // 先把周边数组转成 Set，查找更快
+        const aroundSet = new Set(aroundArr)
+        const aroundFlagged = flaggedArr.filter(idx => aroundSet.has(idx))
+        // console.log(aroundFlagged);
+    // 判断这个数组有几个是 item.stea
+
+        // console.log();
+
+
+
+
+    }
+    else return 'stop'
+
 }
 
 let isManualFlag = 0
@@ -152,12 +188,12 @@ let isManualFlag = 0
 export function mineClearFn(i, mineArr, gridList) {
     // console.log(gridList.value[i].state);
     // console.log(11111);
-    
+
 
 
     // 已打开 就返回
     if (gridList.value[i].state === 1 && isManualFlag) {
-        console.log(213);
+        // console.log(213);
 
         return
     }
@@ -166,11 +202,11 @@ export function mineClearFn(i, mineArr, gridList) {
 
     // 格子是雷
     if (mineArr.value.includes(i) && isManualFlag) {
-        console.log(123);
+        // console.log(123);
 
         return
     }
-// console.log(1);
+    // console.log(1);
 
 
     /* 
@@ -227,11 +263,11 @@ export function mineClearFn(i, mineArr, gridList) {
         { x: x + 1, y: y + 1 },
     ]
     // console.log(1);
-    
+
     //3. 过滤掉越界的（x,y 必须 0~8）
     const valid = around.filter(item => {
         // console.log(1);
-        
+
         return item.x >= 0 && item.x < 9 && item.y >= 0 && item.y < 9
     })
 
@@ -240,7 +276,7 @@ export function mineClearFn(i, mineArr, gridList) {
         return item.y * 9 + item.x  // 绝对不会出负数！
     })
     // console.log(11111);
-    
+
 
     // console.log(result);
 
@@ -255,25 +291,26 @@ export function mineClearFn(i, mineArr, gridList) {
 
     //  周围一圈都没有雷
     if (count == 0 || gridList.value[i].mineNum == 0) {
-        if (gridList.value[i].mineNum == 0) {
-            console.log('自己为空 ，马上递归');
+        // if (gridList.value[i].mineNum == 0) {
+        //     console.log('自己为空 ，马上递归');
 
-        }
+        // }
         result.forEach((item) => {
             // 变成自动
             isManualFlag = 1
             mineClearFn(item, mineArr, gridList)
-            isManualFlag = 0
+
         })
         // isMine = 0
-    } else isManualFlag = 0
+    }
+    isManualFlag = 0
 
 
 
 
 
 
-    return
+    return result
 
 
 

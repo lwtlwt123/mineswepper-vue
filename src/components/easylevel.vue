@@ -3,7 +3,10 @@
         <!-- 雷有了  判断状态-->
         <div class="item" v-for="(cell, index) in gridList"
             @click="clickFn(index, cell ? cell.isHaveMine : 0, 'left', 81)"
-            @contextmenu.prevent="clickFn(index, cell ? cell.isHaveMine : 0, 'right', 81)" :key="index">
+            @contextmenu.prevent="clickFn(index, cell ? cell.isHaveMine : 0, 'right', 81)" 
+            @dblclick = "clickFn(index, cell ? cell.isHaveMine : 0, 'db', 81)"
+            :key="index"
+            >
             <!-- {{ cell ? cell.isHaveMine : 0 }} -->
             <!-- 做到点击到地雷才显示所有地雷 -->
             <!-- 判断点击的index -->
@@ -101,7 +104,53 @@ const clickFn = (i, state, clickMethod, mode) => {
 
 watch(() => gridList.value,
     (newVal) => {
-        // 判断胜利状态
+        if(isClick.value){
+
+            const flagged = newVal
+                .map((cell, idx) => cell.state === 3 ? idx : -1)
+                .filter(i => i !== -1)
+            // console.log(flagged);
+            // 2. 所有雷都被标记
+            const allMinesMarked = mineArr.value.every(i => newVal[i].state === 3)
+    
+            // 3. 标记的都是雷（没有乱插）
+            const onlyMinesMarked = flagged.every(i => mineArr.value.includes(i))
+    
+            // 第一个胜利条件：标记雷 和 雷数组 完全重合
+            const condition1 = allMinesMarked && onlyMinesMarked
+    
+            // 第二个胜利条件  剩下的格子全部被点开
+            const condition2 = gridList.value.every((item, index) => {
+    
+                // 1. 如果这个位置是雷 → 不检查，直接算通过
+                if (mineArr.value.includes(index)) {
+                    return true
+                }
+    
+                // 2. 如果不是雷 → 必须 state === 1（点开）
+                return item.state === 1
+            })
+            console.log(condition1);
+            console.log(condition2);
+            
+            if (condition1 && condition2) {
+                ElMessageBox.alert('游戏结束，恭喜过关！', '提示', {
+                    confirmButtonText: '新的一局',
+                    type: 'error',
+                }).then(() => {
+                    const loadingInstance = ElLoading.service({
+                        lock: true,
+                        text: '游戏加载中...',
+                        spinner: 'el-icon-loading',
+                        background: 'rgba(0, 0, 0, 0.7)'
+                    })
+                    setTimeout(() => {
+                        loadingInstance.close();
+                        initGame()
+                    }, 700);
+                })
+            }
+        }
 
     },
     { deep: true })
