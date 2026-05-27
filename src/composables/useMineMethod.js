@@ -1,5 +1,11 @@
+// 修改难度的标志
+let mineFlag = 0
+
 // 生成地雷随机数组方法
 export function methodOfGeneratingLandmines(arrlength, num, i) {
+    // console.log(arrlength);
+    // console.log(num);
+
     // console.log(i);
 
     // 传入i 不能和随机数组的数字相同
@@ -83,13 +89,23 @@ export function clickMineFn(i, isHaveMine, clickMethod, mode, mineArr, gridList,
         // console.log(isClick.value);
 
         if (!isClick.value)
-            // 只有第一次点击调用此方法
-            mineArr.value = methodOfGeneratingLandmines(mode, 10, i)
+        // 只有第一次点击调用此方法
+        {
+            // console.log('初始数组');
+
+            // let mine = 0
+            if (mode == 81) mineFlag = 10
+            else if (mode == 256) mineFlag = 40
+            if (mode == 480) mineFlag = 99
+            mineArr.value = methodOfGeneratingLandmines(mode, mineFlag, i)
+
+        }
         // 游戏开始 调动生成格子方法 需修改格子 不能上来就点到雷区™™
 
         // 第一次点击赋值
         if (!isClick.value) {
-            gridList.value = cellularAutomatonMethod([], 81, mineArr.value, i)
+
+            gridList.value = cellularAutomatonMethod([], mode, mineArr.value, i)
             // console.log(gridList);
         }
         // console.log(gridList.value[i]);
@@ -114,7 +130,7 @@ export function clickMineFn(i, isHaveMine, clickMethod, mode, mineArr, gridList,
                 // 一圈全部没有雷
                 // if (!isMine) {
                 // result.forEach(element => {
-                mineClearFn(i, mineArr, gridList)
+                mineClearFn(i, mineArr, gridList, mode)
                 // console.log(element);
                 // });
                 // }
@@ -151,30 +167,30 @@ export function clickMineFn(i, isHaveMine, clickMethod, mode, mineArr, gridList,
 
     }
     // 双击事件
-    else if (clickMethod == 'db') {
-        console.log('这里是双击事件');
-        /* 如果周围的雷全部被标记 双击打开格子 */
-        // 判断周围的雷是否全被标记了
-        // if(){}
-        // 周边一圈的坐标
-        const aroundArr = ineClearFn(i, mineArr, gridList)
-        // 标记了的坐标
-        const flagged = gridList.value
-            .map((cell, idx) => cell.state === 3 ? idx : -1)
-            .filter(i => i !== -1)
-        // 获取一个新数组 周边标记了的坐标
-        // 先把周边数组转成 Set，查找更快
-        const aroundSet = new Set(aroundArr)
-        const aroundFlagged = flaggedArr.filter(idx => aroundSet.has(idx))
-        // console.log(aroundFlagged);
-    // 判断这个数组有几个是 item.stea
+    // else if (clickMethod == 'db') {
+    //     console.log('这里是双击事件');
+    //     /* 如果周围的雷全部被标记 双击打开格子 */
+    //     // 判断周围的雷是否全被标记了
+    //     // if(){}
+    //     // 周边一圈的坐标
+    //     const aroundArr = mineClearFn(i, mineArr, gridList)
+    //     // 标记了的坐标
+    //     const flaggedArr = gridList.value
+    //         .map((cell, idx) => cell.state === 3 ? idx : -1)
+    //         .filter(i => i !== -1)
+    //     // 获取一个新数组 周边标记了的坐标
+    //     // 先把周边数组转成 Set，查找更快
+    //     const aroundSet = new Set(aroundArr)
+    //     const aroundFlagged = flaggedArr.filter(idx => aroundSet.has(idx))
+    //     console.log(aroundFlagged);
+    //     // 判断这个数组有几个是 item.stea
 
-        // console.log();
-
-
+    //     // console.log();
 
 
-    }
+
+
+    // }
     else return 'stop'
 
 }
@@ -185,7 +201,7 @@ let isManualFlag = 0
     扩大页面
     点击后会显示附近有多少个雷
 */
-export function mineClearFn(i, mineArr, gridList) {
+export function mineClearFn(i, mineArr, gridList, mode) {
     // console.log(gridList.value[i].state);
     // console.log(11111);
 
@@ -208,7 +224,13 @@ export function mineClearFn(i, mineArr, gridList) {
     }
     // console.log(1);
 
+    /* 
+      切换页面判断边界改变条件
+    */
 
+    if (mode == 81) mineFlag = 9
+    else if (mode == 256) mineFlag = 16
+    else if (mode == 480) mineFlag = 30
     /* 
     遍历四周一圈 判断有多少雷 显示在该方块上 
     给i 设定个坐标 （x，y）
@@ -217,8 +239,8 @@ export function mineClearFn(i, mineArr, gridList) {
     左上 
     */
     // i: 0~80
-    let y = Math.floor(i / 9) // 结果：0~8
-    let x = i % 9             // 结果：0~8
+    let y = Math.floor(i / mineFlag) // 结果：0~8
+    let x = i % mineFlag             // 结果：0~8
     // console.log(x, y);
 
     // console.log(`坐标是${x},${y}`);
@@ -265,15 +287,18 @@ export function mineClearFn(i, mineArr, gridList) {
     // console.log(1);
 
     //3. 过滤掉越界的（x,y 必须 0~8）
+    // if (mode !== 480) {
+
     const valid = around.filter(item => {
         // console.log(1);
 
-        return item.x >= 0 && item.x < 9 && item.y >= 0 && item.y < 9
+        return item.x >= 0 && item.x < mineFlag && item.y >= 0 && item.y < mineFlag == 30 ? 16 : mineFlag
     })
+    // }
 
     // 4. 把合法坐标转回数组索引
     const result = valid.map(item => {
-        return item.y * 9 + item.x  // 绝对不会出负数！
+        return item.y * mineFlag + item.x  // 绝对不会出负数！
     })
     // console.log(11111);
 
@@ -298,7 +323,7 @@ export function mineClearFn(i, mineArr, gridList) {
         result.forEach((item) => {
             // 变成自动
             isManualFlag = 1
-            mineClearFn(item, mineArr, gridList)
+            mineClearFn(item, mineArr, gridList, mode)
 
         })
         // isMine = 0
