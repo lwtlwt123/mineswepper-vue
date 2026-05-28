@@ -5,7 +5,7 @@
             <!-- 计时器 -->
             <div class="timer">
                 <!-- 计时器 -->
-                {{ time }}
+                <span>{{ time }}</span>
             </div>
             <div class="levelChange" @click="changeLevelFn()">
 
@@ -26,9 +26,13 @@
         <!-- 简单  9*9 10 -->
         <!-- 中等  16*16 40 -->
         <!-- 困难  30*16 99 -->
-        <div class="gameBoard">
+        <div class="gameBoard" :class="{
+            easy: levelFlag == 0,
+            medium: levelFlag == 1,
+            hard: levelFlag == 2
+        }">
 
-            <easyLevel v-if="levelFlag == 0" @startFn="startSignFn" />
+            <easyLevel v-if="levelFlag == 0" @startFn="startSignFn" @exitTimer="exitFlagTimer" />
             <mediumLevel v-else-if="levelFlag == 1" />
             <expertlevel v-else="levelFlag ==2" />
         </div>
@@ -49,8 +53,13 @@ const levelFlag = ref(0)
 let clearTimer = null
 const time = ref(0)
 const startFlag = ref(1)
+const exitFlag = ref(1)
 
 const changeLevelFn = () => {
+    clearInterval(clearTimer)
+    time.value = 0
+    exitFlag.value == 0
+    startFlag.value = 1
     if (levelFlag.value == 0)
         levelFlag.value = 1
     else if (levelFlag.value == 1)
@@ -70,14 +79,29 @@ const timeFn = () => {
 // 接收子组件的方法
 const startSignFn = (flag) => {
     // console.log(flag.value);
-    startFlag.value= flag.value
+    // setInterval(clearTimer)
+    time.value = 0
+    startFlag.value = flag.value
+}
+
+const exitFlagTimer = flag => {
+    // setInterval(clearTimer)
+    exitFlag.value = flag.value
+    console.log(exitFlag.value);
+
 }
 
 watch(startFlag, (newVal, oldVal) => {
-    console.log(newVal);
-    
-    if (newVal == 0) {
+    // console.log(newVal);
+    // 加个判断 切换清除定时器
+    if (newVal == 0 && exitFlag.value == 1) {
+        // console.log('进来了');
+
         timeFn()
+    } else if (exitFlag.value == 0) {
+        // 游戏结束 清除定时器
+        clearInterval(clearTimer)
+        time.value = 0
     }
 }, { deep: true })
 
@@ -87,7 +111,7 @@ watch(startFlag, (newVal, oldVal) => {
 
 <style scoped lang="less">
 .shell {
-    max-width: 400px;
+    // max-width: 400px;
     // height: 300px;
     background-color: #c0c0c0;
     padding: 5px 10px;
@@ -106,7 +130,19 @@ watch(startFlag, (newVal, oldVal) => {
         }
     }
 
-    .timer {}
+    .timer {
+        span {
+            font-family: 'Digital-7 Mono', monospace;
+            font-size: 16px;
+            color: #f00;
+            background: #000;
+            padding: 2px 4px;
+            border: 3px inset #666;
+            /* 去模糊，像扫雷那种像素感 */
+            -webkit-font-smoothing: none;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    }
 
     .pedometer {}
 }
@@ -120,5 +156,20 @@ watch(startFlag, (newVal, oldVal) => {
     // left: 500px;
     margin: 30px auto 40px;
     border: 3px outset #dfdfdf
+}
+
+.easy {
+    width: 180px;
+    height: 180px;
+}
+
+.medium {
+    width: 320px;
+    height: 320px;
+}
+
+.hard {
+    width: 600px;
+    height: 320px;
 }
 </style>

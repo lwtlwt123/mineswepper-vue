@@ -201,150 +201,213 @@ let isManualFlag = 0
     扩大页面
     点击后会显示附近有多少个雷
 */
+// export function mineClearFn(i, mineArr, gridList, mode) {
+//     // console.log(gridList.value[i].state);
+//     // console.log(11111);
+
+
+
+//     // 已打开 就返回
+//     if (gridList.value[i].state === 1 && isManualFlag) {
+//         // console.log(213);
+
+//         return
+//     }
+//     // console.log(mineArr.value.includes(i));
+
+
+//     // 格子是雷
+//     if (mineArr.value.includes(i) && isManualFlag) {
+//         // console.log(123);
+
+//         return
+//     }
+//     // console.log(1);
+
+//     /* 
+//       切换页面判断边界改变条件
+//     */
+
+//     if (mode == 81) mineFlag = 9
+//     else if (mode == 256) mineFlag = 16
+//     else if (mode == 480) mineFlag = 30
+//     /* 
+//     遍历四周一圈 判断有多少雷 显示在该方块上 
+//     给i 设定个坐标 （x，y）
+//     x=  i -9y
+//     y= Math.celi(i % 9)
+//     左上 
+//     */
+//     // i: 0~80
+//     let y = Math.floor(i / mineFlag) // 结果：0~8
+//     let x = i % mineFlag             // 结果：0~8
+//     // console.log(x, y);
+
+//     // console.log(`坐标是${x},${y}`);
+//     /* 
+//        得到坐标
+//          判断四周有没有雷
+//          左上 （x-1，y-1）
+//          上（x，y-1）
+//          右上（x+1，y-1）
+//          左（x-1，y）
+//          右（x+1，y）
+//          左下（x-1，y+1）
+//          下（x，y+1）
+//          右下（x+1，y+1）
+
+//          根据他们的xy值恢复角标 i 然后判断在不在有雷数组里面 在的话存起来形成一个新数组 获得长度显示在中间
+
+//          需判断结束后的 xy值不能 小于0大于9
+//      */
+//     // 将他们的坐标存入数组中
+//     /* let arondArr = []
+
+//     arondArr.push(allAroundArrFn(x - 1, y - 1))
+//     arondArr.push(allAroundArrFn(x, y - 1))
+//     arondArr.push(allAroundArrFn(x + 1, y - 1))
+//     arondArr.push(allAroundArrFn(x - 1, y))
+//     arondArr.push(allAroundArrFn(x + 1, y))
+//     arondArr.push(allAroundArrFn(x - 1, y + 1))
+//     arondArr.push(allAroundArrFn(x, y + 1))
+//     arondArr.push(allAroundArrFn(x + 1, y + 1))
+//     console.log(arondArr); */
+
+//     // 2. 周围8个方向（标准写法）
+//     const around = [
+//         { x: x - 1, y: y - 1 },
+//         { x: x, y: y - 1 },
+//         { x: x + 1, y: y - 1 },
+//         { x: x - 1, y: y },
+//         { x: x + 1, y: y },
+//         { x: x - 1, y: y + 1 },
+//         { x: x, y: y + 1 },
+//         { x: x + 1, y: y + 1 },
+//     ]
+//     // console.log(1);
+
+//     //3. 过滤掉越界的（x,y 必须 0~8）
+//     // if (mode !== 480) {
+
+//     const valid = around.filter(item => {
+//         // console.log(1);
+
+//         return item.x >= 0 && item.x < mineFlag && item.y >= 0 && item.y < mineFlag == 30 ? 16 : mineFlag
+//     })
+//     // }
+
+//     // 4. 把合法坐标转回数组索引
+//     const result = valid.map(item => {
+//         return item.y * mineFlag + item.x  // 绝对不会出负数！
+//     })
+//     // console.log(11111);
+
+
+//     // console.log(result);
+
+//     // 判断result 和 mineArr有几个重合的 判断雷的个数 有就显示数字 没有啥也不显示
+//     // console.log(mineArr.value);
+//     // let isMine = 1
+//     let count = result.filter(n => new Set(mineArr.value).has(n)).length;
+//     gridList.value[i].mineNum = count
+//     gridList.value[i].state = 1
+//     // console.log(gridList.value[i].mineNum);
+
+
+//     //  周围一圈都没有雷
+//     if (count == 0 || gridList.value[i].mineNum == 0) {
+//         // if (gridList.value[i].mineNum == 0) {
+//         //     console.log('自己为空 ，马上递归');
+
+//         // }
+//         result.forEach((item) => {
+//             // 变成自动
+//             isManualFlag = 1
+//             mineClearFn(item, mineArr, gridList, mode)
+
+//         })
+//         // isMine = 0
+//     }
+//     isManualFlag = 0
+
+
+
+
+
+
+//     return result
+
+
+
+
+
+
+
+
+
+// }
+
+// 难度配置
+const MODE_CONFIG = {
+    81: { cols: 9, rows: 9 },
+    256: { cols: 16, rows: 16 },
+    480: { cols: 30, rows: 16 }
+}
+
 export function mineClearFn(i, mineArr, gridList, mode) {
-    // console.log(gridList.value[i].state);
-    // console.log(11111);
+    // 拿到当前难度行列
+    const { cols, rows } = MODE_CONFIG[mode]
+    const totalCell = cols * rows
 
+    // 越界直接返回
+    if (i < 0 || i >= totalCell) return
 
-
-    // 已打开 就返回
+    // 已打开 → 返回（你原来的逻辑）
     if (gridList.value[i].state === 1 && isManualFlag) {
-        // console.log(213);
-
         return
     }
-    // console.log(mineArr.value.includes(i));
 
-
-    // 格子是雷
+    // 是雷 → 返回（你原来的逻辑）
     if (mineArr.value.includes(i) && isManualFlag) {
-        // console.log(123);
-
         return
     }
-    // console.log(1);
 
-    /* 
-      切换页面判断边界改变条件
-    */
+    // 坐标计算
+    const x = i % cols
+    const y = Math.floor(i / cols)
 
-    if (mode == 81) mineFlag = 9
-    else if (mode == 256) mineFlag = 16
-    else if (mode == 480) mineFlag = 30
-    /* 
-    遍历四周一圈 判断有多少雷 显示在该方块上 
-    给i 设定个坐标 （x，y）
-    x=  i -9y
-    y= Math.celi(i % 9)
-    左上 
-    */
-    // i: 0~80
-    let y = Math.floor(i / mineFlag) // 结果：0~8
-    let x = i % mineFlag             // 结果：0~8
-    // console.log(x, y);
-
-    // console.log(`坐标是${x},${y}`);
-    /* 
-       得到坐标
-         判断四周有没有雷
-         左上 （x-1，y-1）
-         上（x，y-1）
-         右上（x+1，y-1）
-         左（x-1，y）
-         右（x+1，y）
-         左下（x-1，y+1）
-         下（x，y+1）
-         右下（x+1，y+1）
-
-         根据他们的xy值恢复角标 i 然后判断在不在有雷数组里面 在的话存起来形成一个新数组 获得长度显示在中间
-
-         需判断结束后的 xy值不能 小于0大于9
-     */
-    // 将他们的坐标存入数组中
-    /* let arondArr = []
-
-    arondArr.push(allAroundArrFn(x - 1, y - 1))
-    arondArr.push(allAroundArrFn(x, y - 1))
-    arondArr.push(allAroundArrFn(x + 1, y - 1))
-    arondArr.push(allAroundArrFn(x - 1, y))
-    arondArr.push(allAroundArrFn(x + 1, y))
-    arondArr.push(allAroundArrFn(x - 1, y + 1))
-    arondArr.push(allAroundArrFn(x, y + 1))
-    arondArr.push(allAroundArrFn(x + 1, y + 1))
-    console.log(arondArr); */
-
-    // 2. 周围8个方向（标准写法）
+    // 8个方向
     const around = [
-        { x: x - 1, y: y - 1 },
-        { x: x, y: y - 1 },
-        { x: x + 1, y: y - 1 },
-        { x: x - 1, y: y },
-        { x: x + 1, y: y },
-        { x: x - 1, y: y + 1 },
-        { x: x, y: y + 1 },
-        { x: x + 1, y: y + 1 },
+        { x: x - 1, y: y - 1 }, { x: x, y: y - 1 }, { x: x + 1, y: y - 1 },
+        { x: x - 1, y: y }, { x: x + 1, y: y },
+        { x: x - 1, y: y + 1 }, { x: x, y: y + 1 }, { x: x + 1, y: y + 1 }
     ]
-    // console.log(1);
 
-    //3. 过滤掉越界的（x,y 必须 0~8）
-    // if (mode !== 480) {
-
+    // 合法坐标过滤
     const valid = around.filter(item => {
-        // console.log(1);
-
-        return item.x >= 0 && item.x < mineFlag && item.y >= 0 && item.y < mineFlag == 30 ? 16 : mineFlag
+        return item.x >= 0 && item.x < cols && item.y >= 0 && item.y < rows
     })
-    // }
 
-    // 4. 把合法坐标转回数组索引
-    const result = valid.map(item => {
-        return item.y * mineFlag + item.x  // 绝对不会出负数！
-    })
-    // console.log(11111);
+    // 转回索引
+    const result = valid.map(item => item.y * cols + item.x)
 
+    // 算雷数
+    const count = result.filter(n => new Set(mineArr.value).has(n)).length
 
-    // console.log(result);
-
-    // 判断result 和 mineArr有几个重合的 判断雷的个数 有就显示数字 没有啥也不显示
-    // console.log(mineArr.value);
-    // let isMine = 1
-    let count = result.filter(n => new Set(mineArr.value).has(n)).length;
+    // 打开格子
     gridList.value[i].mineNum = count
     gridList.value[i].state = 1
-    // console.log(gridList.value[i].mineNum);
 
-
-    //  周围一圈都没有雷
-    if (count == 0 || gridList.value[i].mineNum == 0) {
-        // if (gridList.value[i].mineNum == 0) {
-        //     console.log('自己为空 ，马上递归');
-
-        // }
-        result.forEach((item) => {
-            // 变成自动
-            isManualFlag = 1
+    // 空 → 递归
+    if (count === 0) {
+        isManualFlag = 1  // 你原来的：递归时自动打开
+        result.forEach(item => {
             mineClearFn(item, mineArr, gridList, mode)
-
         })
-        // isMine = 0
     }
-    isManualFlag = 0
 
-
-
-
-
-
+    isManualFlag = 0  // 你原来的：递归结束恢复手动
     return result
-
-
-
-
-
-
-
-
-
 }
 
 

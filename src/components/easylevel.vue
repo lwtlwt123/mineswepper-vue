@@ -62,7 +62,8 @@ let clearTimer = null
 let clearTimer1 = null
 
 // 子组件传值
-const emit = defineEmits(['startFn'])
+const emit = defineEmits(['startFn','exitTimer'])
+// const emit1 = defineEmits([])
 const sendFn = () => {
     emit('startFn', isClick)
 }
@@ -71,8 +72,9 @@ const sendFn = () => {
 const initGame = () => {
     mineArr.value = []
     gridList.value = new Array(81)
-    isClick.value = 0
+
     isShow.value = 0
+
 }
 
 const clickFn = (i, state, clickMethod, mode) => {
@@ -140,13 +142,14 @@ watch(() => gridList.value,
                 // 2. 如果不是雷 → 必须 state === 1（点开）
                 return item.state === 1
             })
-            console.log(condition1);
-            console.log(condition2);
+            // console.log(condition1);
+            // console.log(condition2);
+            console.log(mineArr.length);
+            
+            if (condition1 && condition2 && mineArr.value.length !== 0) {
 
-            if (condition1 && condition2) {
-                // 传停止计时器
-                const emit = defineEmits('exitTimer')
-                emit('exitTimer',isClick)
+
+
                 ElMessageBox.alert('游戏结束，恭喜过关！', '提示', {
                     confirmButtonText: '新的一局',
                     type: 'error',
@@ -160,6 +163,10 @@ watch(() => gridList.value,
                     clearTimeout(clearTimer1)
                     clearTimer1 = setTimeout(() => {
                         loadingInstance.close();
+                        isClick.value = 0
+                        // 传停止计时器
+                        
+                        emit('exitTimer', isClick)
                         initGame()
                     }, 700);
                 })
@@ -180,6 +187,7 @@ watch(() => gridList.value,
 <style scoped lang="less">
 .mineClearanceAreaEasy {
     width: 100%;
+    max-width: 202px;
     height: 100%;
 
     display: flex;
