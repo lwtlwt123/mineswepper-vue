@@ -62,9 +62,11 @@ let clearTimer = null
 let clearTimer1 = null
 
 // 子组件传值
-const emit = defineEmits(['startFn','exitTimer'])
+const emit = defineEmits(['startFn', 'exitTimer'])
 // const emit1 = defineEmits([])
 const sendFn = () => {
+    // console.log(isClick.value);
+
     emit('startFn', isClick)
 }
 
@@ -97,7 +99,10 @@ const clickFn = (i, state, clickMethod, mode) => {
             clearTimeout(clearTimer)
             clearTimer = setTimeout(() => {
                 loadingInstance.close();
+                isClick.value = 0
                 initGame()
+
+                emit('exitTimer', isClick)
             }, 700);
         })
     }
@@ -145,7 +150,7 @@ watch(() => gridList.value,
             // console.log(condition1);
             // console.log(condition2);
             console.log(mineArr.length);
-            
+
             if (condition1 && condition2 && mineArr.value.length !== 0) {
 
 
@@ -165,7 +170,7 @@ watch(() => gridList.value,
                         loadingInstance.close();
                         isClick.value = 0
                         // 传停止计时器
-                        
+
                         emit('exitTimer', isClick)
                         initGame()
                     }, 700);

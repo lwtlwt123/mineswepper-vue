@@ -33,8 +33,8 @@
         }">
 
             <easyLevel v-if="levelFlag == 0" @startFn="startSignFn" @exitTimer="exitFlagTimer" />
-            <mediumLevel v-else-if="levelFlag == 1" />
-            <expertlevel v-else="levelFlag ==2" />
+            <mediumLevel v-else-if="levelFlag == 1" @startFn="startSignFn" @exitTimer="exitFlagTimer" />
+            <expertlevel v-else="levelFlag ==2" @startFn="startSignFn" @exitTimer="exitFlagTimer" />
         </div>
 
         <!-- <testPage /> -->
@@ -58,7 +58,7 @@ const exitFlag = ref(1)
 const changeLevelFn = () => {
     clearInterval(clearTimer)
     time.value = 0
-    exitFlag.value == 0
+    exitFlag.value = 1
     startFlag.value = 1
     if (levelFlag.value == 0)
         levelFlag.value = 1
@@ -72,6 +72,7 @@ const changeLevelFn = () => {
 const timeFn = () => {
     clearInterval(clearTimer)
     clearTimer = setInterval(() => {
+        console.log('计时中：', time.value) // 加个日志，确认函数在执行
         time.value++
     }, 1000);
 }
@@ -80,27 +81,51 @@ const timeFn = () => {
 const startSignFn = (flag) => {
     // console.log(flag.value);
     // setInterval(clearTimer)
-    time.value = 0
+    // time.value = 0
     startFlag.value = flag.value
 }
 
 const exitFlagTimer = flag => {
     // setInterval(clearTimer)
-    exitFlag.value = flag.value
+    exitFlag.value = flag ? flag.value : 1
     console.log(exitFlag.value);
 
 }
 
-watch(startFlag, (newVal, oldVal) => {
-    // console.log(newVal);
-    // 加个判断 切换清除定时器
-    if (newVal == 0 && exitFlag.value == 1) {
-        // console.log('进来了');
+// watch(startFlag, (newVal, oldVal) => {
+//     // console.log(newVal);
+//     // exitFlagTimer()
+//     // console.log(exitFlag.value);
 
-        timeFn()
-    } else if (exitFlag.value == 0) {
-        // 游戏结束 清除定时器
+//     // 加个判断 切换清除定时器
+//     if (newVal == 0 && exitFlag.value == 1) {
+//         // console.log('1进来了');
+
+//         timeFn()
+//     } else if (exitFlag.value == 0) {
+//         // console.log('2进来了');
+//         console.log('游戏结束了');
+
+//         // 游戏结束 清除定时器
+//         clearInterval(clearTimer)
+//         time.value = 0
+//     } else {
+//         // console.log('来这里了');
+//         /* 
+//         为什么来这里会清除定时器效果
+//         */
+
+//     }
+// }, { deep: true })
+
+watch([startFlag, exitFlag], ([newStart, newExit]) => {
+    console.log('watch触发：startFlag', newStart, 'exitFlag', newExit)
+    if (newStart === 0 && newExit === 1) {
+        timeFn() // 游戏开始，启动计时器
+    } else if (newExit === 0) {
+        console.log('游戏结束了，执行停止逻辑')
         clearInterval(clearTimer)
+        clearTimer = null
         time.value = 0
     }
 }, { deep: true })
