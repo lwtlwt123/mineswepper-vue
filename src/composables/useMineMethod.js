@@ -77,12 +77,13 @@ export function cellularAutomatonMethod(arr, quantity, mineArr, i) {
 
 // 点击事件
 export function clickMineFn(i, isHaveMine, clickMethod, mode, mineArr, gridList, isClick) {
+    
     // console.log(isClick.value);
 
     // state 状态  clickMethod 判断左右键点击不同的方法
     // 点击之后才开始分配雷区
     // 判断第一次点击
-    // console.log(gridList.value[i]);
+    // console.log(gridList.value);
 
     // 左键
     if (clickMethod == "left") {
@@ -101,7 +102,8 @@ export function clickMineFn(i, isHaveMine, clickMethod, mode, mineArr, gridList,
 
         }
         // 游戏开始 调动生成格子方法 需修改格子 不能上来就点到雷区™™
-
+        console.log(isClick.value);
+        
         // 第一次点击赋值
         if (!isClick.value) {
 

@@ -46,6 +46,8 @@ import {
 import { ElMessageBox, ElMessage, ElLoading } from 'element-plus'
 // 有雷数组 点击方法时候再赋值
 const mineArr = ref([])
+// 计步器
+const step = ref(0)
 // 初始化数组
 // 刚进页面时不给 gridlist 赋值 用另外一个数组进行渲染
 const gridList = ref(new Array(81))
@@ -62,31 +64,57 @@ let clearTimer = null
 let clearTimer1 = null
 
 // 子组件传值
-const emit = defineEmits(['startFn', 'exitTimer'])
+const emit = defineEmits(['startFn', 'exitTimer', 'stepStartFn', 'stepExitFn'])
 // const emit1 = defineEmits([])
 const sendFn = () => {
     // console.log(isClick.value);
 
-    emit('startFn', isClick)
+    emit('startFn', isClick.value)
+    // console.log('我走了没');
+
 }
+
+// 接收父传的 props
+const timeNum = defineProps({
+    time: {
+        type: Number,
+        default: 0
+    }
+})
 
 // 重制游戏的方法 不想刷新页面
 const initGame = () => {
     mineArr.value = []
     gridList.value = new Array(81)
-
     isShow.value = 0
+    isClick.value = 0
+    step.value = 0
 
 }
 
 const clickFn = (i, state, clickMethod, mode) => {
     sendFn()
+
+    // 计步器增加
+    // console.log(step.value);
+
+    step.value++
+    // console.log();
+
+    emit('stepStartFn', step.value)
+
     let sign = clickMineFn(i, state, clickMethod, mode, mineArr, gridList, isClick)
 
     // 点击到地雷显示游戏结束了
     isShow.value = sign
+
+    // 
     if (isShow.value === 1) {
-        ElMessageBox.alert('踩雷啦，游戏结束！', '提示', {
+        // 踩雷时候计时器就要停止工作了
+        emit('exitTimer', 0)
+        emit('stepExitFn', 0)
+
+        ElMessageBox.alert(`踩雷啦，游戏结束！本次用时${timeNum.time}秒，走了${step.value}步`, '提示', {
             confirmButtonText: '重新开始',
             type: 'error',
         }).then(() => {
@@ -99,11 +127,15 @@ const clickFn = (i, state, clickMethod, mode) => {
             clearTimeout(clearTimer)
             clearTimer = setTimeout(() => {
                 loadingInstance.close();
-                isClick.value = 0
+
+                // emit('exitTimer', isClick)
+
                 initGame()
 
-                emit('exitTimer', isClick)
             }, 700);
+        }).catch(() => {
+            clearTimeout(clearTimer) // 关键：也要清理定时器
+            initGame() // 直接重置游戏，不显示loading
         })
     }
 
@@ -117,6 +149,8 @@ const clickFn = (i, state, clickMethod, mode) => {
 
 
 }
+
+
 
 
 watch(() => gridList.value,
@@ -181,6 +215,11 @@ watch(() => gridList.value,
     },
     { deep: true })
 
+// 子组件方法 暴露给父组件使用
+// defineExpose({
+//     initGame
+// })
+
 
 
 
@@ -192,7 +231,7 @@ watch(() => gridList.value,
 <style scoped lang="less">
 .mineClearanceAreaEasy {
     width: 100%;
-    max-width: 202px;
+    // max-width: 202px;
     height: 100%;
 
     display: flex;
