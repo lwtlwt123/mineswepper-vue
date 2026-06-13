@@ -94,13 +94,7 @@ const initGame = () => {
 
 const clickFn = (i, state, clickMethod, mode) => {
     sendFn()
-
-    // 计步器增加
-    // console.log(step.value);
-
     step.value++
-    // console.log();
-
     emit('stepStartFn', step.value)
 
     let sign = clickMineFn(i, state, clickMethod, mode, mineArr, gridList, isClick)
@@ -183,15 +177,16 @@ watch(() => gridList.value,
             })
             // console.log(condition1);
             // console.log(condition2);
-            console.log(mineArr.length);
+            // console.log(mineArr.length);
 
             if (condition1 && condition2 && mineArr.value.length !== 0) {
 
+                emit('exitTimer', 0)
+                emit('stepExitFn', step.value)
 
-
-                ElMessageBox.alert('游戏结束，恭喜过关！', '提示', {
+                ElMessageBox.alert(`游戏结束，恭喜过关！本次用时${timeNum.time}秒，走了${step.value}步`, '提示', {
                     confirmButtonText: '新的一局',
-                    type: 'error',
+                    type: 'success',
                 }).then(() => {
                     const loadingInstance = ElLoading.service({
                         lock: true,
@@ -199,6 +194,7 @@ watch(() => gridList.value,
                         spinner: 'el-icon-loading',
                         background: 'rgba(0, 0, 0, 0.7)'
                     })
+
                     clearTimeout(clearTimer1)
                     clearTimer1 = setTimeout(() => {
                         loadingInstance.close();

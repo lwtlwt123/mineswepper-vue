@@ -5,7 +5,7 @@
         </div>
         <div class="shell">
             <!-- 登陆框 -->
-    
+
             <!-- 工具栏 -->
             <div class="tool">
                 <!-- 计时器 -->
@@ -14,7 +14,7 @@
                     <span>{{ time }}</span>
                 </div>
                 <div class="levelChange" @click="changeLevelFn()">
-    
+
                     <!-- 难度切换 -->
                     <img src="./assets/image/easy.svg" alt="" v-show="levelFlag == 0"
                         :style="{ width: '20px', height: '20px' }">
@@ -38,7 +38,7 @@
                 medium: levelFlag == 1,
                 hard: levelFlag == 2
             }">
-    
+
                 <easyLevel v-if="levelFlag == 0" @startFn="startSignFn" @exitTimer="exitFlagTimer"
                     @stepStartFn="stepStartExitFn" @stepExitFn="stepStartExitFn" :time="time" />
                 <mediumLevel v-else-if="levelFlag == 1" @startFn="startSignFn" @exitTimer="exitFlagTimer"
@@ -46,8 +46,8 @@
                 <expertlevel v-else="levelFlag ==2" @startFn="startSignFn" @exitTimer="exitFlagTimer"
                     @stepStartFn="stepStartExitFn" @stepExitFn="stepStartExitFn" :time="time" />
             </div>
-    
-    
+
+
             <!-- <testPage /> -->
         </div>
     </div>
@@ -59,6 +59,8 @@ import mediumLevel from './components/mediumlevel.vue'
 import expertlevel from './components/expertlevel.vue'
 import loginPop from "./components/loginPop.vue";
 import { ref, watch } from "vue";
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { setScore } from "./api/userApi.js";
 // import testPage from './components/test.vue'
 
 // 设置难度 0 1 2
@@ -68,6 +70,8 @@ const time = ref(0)
 const step = ref(0)
 const startFlag = ref(1)
 const exitFlag = ref(1)
+
+
 
 const changeLevelFn = () => {
     clearInterval(clearTimer)
@@ -115,42 +119,35 @@ const stepStartExitFn = flag => {
     step.value = flag
 }
 
-// const stepExitFn = flag => {
-//     step.value = flag
-// }
+// 记录分数的方法
+const setScoreFn = async () => {
+    // console.log('这里是记录游戏分数的方法');
+    // console.log(time.value, step.value, JSON.parse(localStorage.getItem('userInfo')));
+    let info = {
+        userId: JSON.parse(localStorage.getItem('userInfo')).id,
+        gameLevel: levelFlag.value,
+        gameTime: time.value,
+        step: step.value
+    }
+    let res = await setScore(info)
+    console.log(res);
 
-// watch(startFlag, (newVal, oldVal) => {
-//     // console.log(newVal);
-//     // exitFlagTimer()
-//     // console.log(exitFlag.value);
 
-//     // 加个判断 切换清除定时器
-//     if (newVal == 0 && exitFlag.value == 1) {
-//         // console.log('1进来了');
+}
 
-//         timeFn()
-//     } else if (exitFlag.value == 0) {
-//         // console.log('2进来了');
-//         console.log('游戏结束了');
 
-//         // 游戏结束 清除定时器
-//         clearInterval(clearTimer)
-//         time.value = 0
-//     } else {
-//         // console.log('来这里了');
-//         /* 
-//         为什么来这里会清除定时器效果
-//         */
-
-//     }
-// }, { deep: true })
 
 watch([startFlag, exitFlag], ([newStart, newExit]) => {
     console.log('watch触发：startFlag', newStart, 'exitFlag', newExit)
+    console.log(step.value);
+
     if (newStart === 0 && newExit === 1) {
         timeFn() // 游戏开始，启动计时器
     } else if (newExit === 0) {
         // console.log('游戏结束了，执行停止逻辑')
+        // 判断是踩雷了还是游戏成功
+        if (step.value) setScoreFn()
+
         clearInterval(clearTimer)
         clearTimer = null
         time.value = 0

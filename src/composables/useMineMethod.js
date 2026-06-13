@@ -77,7 +77,7 @@ export function cellularAutomatonMethod(arr, quantity, mineArr, i) {
 
 // 点击事件
 export function clickMineFn(i, isHaveMine, clickMethod, mode, mineArr, gridList, isClick) {
-    
+
     // console.log(isClick.value);
 
     // state 状态  clickMethod 判断左右键点击不同的方法
@@ -95,15 +95,15 @@ export function clickMineFn(i, isHaveMine, clickMethod, mode, mineArr, gridList,
             // console.log('初始数组');
 
             // let mine = 0
-            if (mode == 81) mineFlag = 10
-            else if (mode == 256) mineFlag = 40
-            if (mode == 480) mineFlag = 99
+            if (mode == 81) mineFlag = 1
+            else if (mode == 256) mineFlag = 1
+            if (mode == 480) mineFlag = 1
             mineArr.value = methodOfGeneratingLandmines(mode, mineFlag, i)
 
         }
         // 游戏开始 调动生成格子方法 需修改格子 不能上来就点到雷区™™
-        console.log(isClick.value);
-        
+        // console.log(isClick.value);´
+
         // 第一次点击赋值
         if (!isClick.value) {
 
@@ -143,7 +143,13 @@ export function clickMineFn(i, isHaveMine, clickMethod, mode, mineArr, gridList,
 
 
     } else if (clickMethod == "right" && (gridList.value[i] ? gridList.value[i].state !== 1 : 0)) {
-        // console.log(gridList.value);
+
+
+
+
+        if (gridList.value[i].state === 1)
+            return;
+
 
 
         // 判断右键时的状态 
@@ -152,6 +158,8 @@ export function clickMineFn(i, isHaveMine, clickMethod, mode, mineArr, gridList,
         } else {
             //第一次右键插旗
             // console.log(gridList.value[i].state);
+
+
 
             if (gridList.value[i].state == 3)
                 gridList.value[i].state = 4
@@ -168,6 +176,9 @@ export function clickMineFn(i, isHaveMine, clickMethod, mode, mineArr, gridList,
 
 
     }
+    else if (clickMethod == 'right')
+        return
+
     // 双击事件
     // else if (clickMethod == 'db') {
     //     console.log('这里是双击事件');
