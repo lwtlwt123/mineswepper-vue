@@ -212,9 +212,9 @@ watch(() => gridList.value,
     { deep: true })
 
 // 子组件方法 暴露给父组件使用
-// defineExpose({
-//     initGame
-// })
+defineExpose({
+    initGame
+})
 
 
 

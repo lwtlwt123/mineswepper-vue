@@ -1,9 +1,9 @@
 <template>
     <div>
         <div>
-            <loginPop />
+            <loginPop @callInit="handleCallInit" />
         </div>
-        <div class="shell">
+        <div class="shell" v-show="loginFlag">
             <!-- 登陆框 -->
 
             <!-- 工具栏 -->
@@ -40,11 +40,11 @@
             }">
 
                 <easyLevel v-if="levelFlag == 0" @startFn="startSignFn" @exitTimer="exitFlagTimer"
-                    @stepStartFn="stepStartExitFn" @stepExitFn="stepStartExitFn" :time="time" />
+                    @stepStartFn="stepStartExitFn" @stepExitFn="stepStartExitFn" :time="time" ref="easyRef" />
                 <mediumLevel v-else-if="levelFlag == 1" @startFn="startSignFn" @exitTimer="exitFlagTimer"
-                    @stepStartFn="stepStartExitFn" @stepExitFn="stepStartExitFn" :time="time" />
+                    @stepStartFn="stepStartExitFn" @stepExitFn="stepStartExitFn" :time="time" ref="easyRef" />
                 <expertlevel v-else="levelFlag ==2" @startFn="startSignFn" @exitTimer="exitFlagTimer"
-                    @stepStartFn="stepStartExitFn" @stepExitFn="stepStartExitFn" :time="time" />
+                    @stepStartFn="stepStartExitFn" @stepExitFn="stepStartExitFn" :time="time" ref="easyRef" />
             </div>
 
 
@@ -60,7 +60,7 @@ import expertlevel from './components/expertlevel.vue'
 import loginPop from "./components/loginPop.vue";
 import { ref, watch } from "vue";
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { setScore } from "./api/userApi.js";
+import { setScore, loginFlag } from "./api/userApi.js";
 // import testPage from './components/test.vue'
 
 // 设置难度 0 1 2
@@ -70,7 +70,17 @@ const time = ref(0)
 const step = ref(0)
 const startFlag = ref(1)
 const exitFlag = ref(1)
+const easyRef = ref(null)
 
+
+const handleCallInit = () => {
+    console.log(123312312312);
+    console.log(easyRef.value);
+
+    if (easyRef.value) {
+        easyRef.value.initGame()
+    }
+}
 
 
 const changeLevelFn = () => {
@@ -123,24 +133,27 @@ const stepStartExitFn = flag => {
 const setScoreFn = async () => {
     // console.log('这里是记录游戏分数的方法');
     // console.log(time.value, step.value, JSON.parse(localStorage.getItem('userInfo')));
-    let info = {
-        userId: JSON.parse(localStorage.getItem('userInfo')).id,
-        gameLevel: levelFlag.value,
-        gameTime: time.value,
-        step: step.value
+    try {
+        let info = {
+            userId: JSON.parse(localStorage.getItem('userInfo')).id,
+            gameLevel: levelFlag.value,
+            gameTime: time.value,
+            step: step.value
+        }
+        let res = await setScore(info)
     }
-    let res = await setScore(info)
-    console.log(res);
-
+    catch (err) {
+        // 移除弹窗遮罩层
+        document.querySelectorAll('.el-overlay').forEach(el => el.remove())
+        // 移除弹窗本体
+        document.querySelectorAll('.el-message-box').forEach(el => el.remove())
+    }
 
 }
 
 
 
 watch([startFlag, exitFlag], ([newStart, newExit]) => {
-    console.log('watch触发：startFlag', newStart, 'exitFlag', newExit)
-    console.log(step.value);
-
     if (newStart === 0 && newExit === 1) {
         timeFn() // 游戏开始，启动计时器
     } else if (newExit === 0) {
@@ -152,6 +165,7 @@ watch([startFlag, exitFlag], ([newStart, newExit]) => {
         clearTimer = null
         time.value = 0
         exitFlag.value = 1
+        step.value = 0
     }
 }, { deep: true })
 
